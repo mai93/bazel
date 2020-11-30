@@ -275,7 +275,7 @@ def _is_msbuildtools(vc_path):
 
 def _find_vcvars_bat_script(repository_ctx, vc_path):
     """Find batch script to set up environment variables for VC. Doesn't %-escape the result."""
-    if _is_vs_2017_or_2019(vc_path):
+    if _is_vs_2017_or_2019(repository_ctx, vc_path):
         vcvars_script = vc_path + "\\Auxiliary\\Build\\VCVARSALL.BAT"
     else:
         vcvars_script = vc_path + "\\VCVARSALL.BAT"
@@ -293,7 +293,7 @@ def _is_support_vcvars_ver(vc_full_version):
 
 def _is_support_winsdk_selection(repository_ctx, vc_path):
     """Windows SDK selection is supported with VC 2017 / 2019 or with full VS 2015 installation."""
-    if _is_vs_2017_or_2019(vc_path):
+    if _is_vs_2017_or_2019(repository_ctx, vc_path):
         return True
 
     # By checking the source code of VCVARSALL.BAT in VC 2015, we know that
@@ -319,7 +319,7 @@ def _get_vc_env_vars(repository_ctx, vc_path, msvc_vars_x64, target_arch):
         dictionary of envvars
     """
     env = {}
-    if _is_vs_2017_or_2019(vc_path):
+    if _is_vs_2017_or_2019(repository_ctx, vc_path):
         lib = msvc_vars_x64["%{msvc_env_lib_x64}"]
         full_version = _get_vc_full_version(repository_ctx, vc_path)
         tools_path = "%s\\Tools\\MSVC\\%s\\bin\\HostX64\\%s" % (vc_path, full_version, target_arch)
@@ -363,7 +363,7 @@ def setup_vc_env_vars(repository_ctx, vc_path, envvars = [], allow_empty = False
 
     # Get VC version set by user. Only supports VC 2017 & 2019.
     vcvars_ver = ""
-    if _is_vs_2017_or_2019(vc_path):
+    if _is_vs_2017_or_2019(repository_ctx, vc_path):
         full_version = _get_vc_full_version(repository_ctx, vc_path)
 
         # Because VCVARSALL.BAT is from the latest VC installed, so we check if the latest
@@ -444,7 +444,7 @@ def _find_msvc_tools(repository_ctx, vc_path, target_arch = "x64"):
 def find_msvc_tool(repository_ctx, vc_path, tool, target_arch = "x64"):
     """Find the exact path of a specific build tool in MSVC. Doesn't %-escape the result."""
     tool_path = None
-    if _is_vs_2017_or_2019(vc_path) or _is_msbuildtools(vc_path):
+    if _is_vs_2017_or_2019(repository_ctx, vc_path) or _is_msbuildtools(vc_path):
         full_version = _get_vc_full_version(repository_ctx, vc_path)
         if full_version:
             tool_path = "%s\\Tools\\MSVC\\%s\\bin\\HostX64\\%s\\%s" % (vc_path, full_version, target_arch, tool)
