@@ -261,10 +261,10 @@ def _is_vs_2017_or_2019(repository_ctx, vc_path):
     # In VS 2017 and 2019, it contains only three directories:
     # "Auxiliary", "Redist", "Tools"
 
-    vc_2017_or_2019_entries = ["Auxiliary", "Redist", "Tools"]
-    vc_path_entries = [d.basename for d in repository_ctx.path(vc_path).readdir()]
-    vc_path_entries = sorted(vc_path_entries)
-    return vc_path_entries == vc_2017_or_2019_entries
+    vc_2017_or_2019_contents = ["Auxiliary", "Redist", "Tools"]
+    vc_path_contents = [d.basename for d in repository_ctx.path(vc_path).readdir()]
+    vc_path_contents = sorted(vc_path_contents)
+    return vc_path_contents == vc_2017_or_2019_contents
 
 def _is_msbuildtools(vc_path):
     """Check if the installed VC version is from MSBuildTools."""
