@@ -254,14 +254,17 @@ def find_vc_path(repository_ctx):
     auto_configure_warning_maybe(repository_ctx, "Visual C++ build tools found at %s" % vc_dir)
     return vc_dir
 
-def _is_vs_2017_or_2019(vc_path):
-    """Check if the installed VS version is Visual Studio 2017."""
+def _is_vs_2017_or_2019(repository_ctx, vc_path):
+    """Check if the installed VS version is Visual Studio 2017 or 2019."""
 
-    # In VS 2017 and 2019, the location of VC is like:
-    # C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\
-    # In VS 2015 or older version, it is like:
-    # C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\
-    return vc_path.find("2017") != -1 or vc_path.find("2019") != -1
+    # The layout of VC folder in VS 2017 and 2019 is different from that in VS 2015 and older versions.
+    # In VS 2017 and 2019, it contains only three directories:
+    # "Auxiliary", "Redist", "Tools"
+
+    vc_2017_or_2019_entries = ["Auxiliary", "Redist", "Tools"]
+    vc_path_entries = [d.basename for d in repository_ctx.path(vc_path).readdir()]
+    vc_path_entries = sorted(vc_path_entries)
+    return vc_path_entries == vc_2017_or_2019_entries
 
 def _is_msbuildtools(vc_path):
     """Check if the installed VC version is from MSBuildTools."""
