@@ -237,6 +237,19 @@ class OptionsParserImpl {
     }
   }
 
+  private void maybeAddOldNameWarning(ParsedOptionDescription parsedOption){
+    // Don't add a warning for old name options set by the invocation policy.
+    if (parsedOption.getPriority().getPriorityCategory().equals(INVOCATION_POLICY)) {
+      return;
+    }
+    String commandLineForm = parsedOption.getCommandLineForm();
+    String oldOptionName = parsedOption.getOptionDefinition().getOldOptionName();
+    String optionName = parsedOption.getOptionDefinition().getOptionName();
+    if(commandLineForm.startsWith(String.format("--%s=", oldOptionName))) {
+      addDeprecationWarning(oldOptionName, String.format("Use --%s instead", optionName));
+    }
+  }
+
   private void addDeprecationWarning(String optionName, String warning) {
     warnings.add(
         String.format(
@@ -476,6 +489,8 @@ class OptionsParserImpl {
     OptionDefinition optionDefinition = parsedOption.getOptionDefinition();
     // All options can be deprecated; check and warn before doing any option-type specific work.
     maybeAddDeprecationWarning(optionDefinition, parsedOption.getPriority().getPriorityCategory());
+    // Check if the old option name is used and add a warning
+    maybeAddOldNameWarning(parsedOption);
     // Track the value, before any remaining option-type specific work that is done outside of
     // the OptionValueDescription.
     OptionValueDescription entry =
@@ -590,7 +605,6 @@ class OptionsParserImpl {
       // Do not recognize internal options, which are treated as if they did not exist.
       throw new OptionsParsingException("Unrecognized option: " + arg, arg);
     }
-
     if (unconvertedValue == null) {
       // Special-case boolean to supply value based on presence of "no" prefix.
       if (optionDefinition.usesBooleanValueSyntax()) {
